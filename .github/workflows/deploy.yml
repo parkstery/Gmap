@@ -1,38 +1,11 @@
-name: Deploy to GitHub Pages
+- name: Create API config
+  run: |
+    echo "MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+    cat .env
 
-on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Inject Google Maps API Key
-        run: |
-          sed -i "s/YOUR_API_KEY/${{ secrets.GOOGLE_MAPS_API_KEY }}/g" index.html
-          echo "✅ API Key 주입 완료: $(grep -o 'AIzaSy[A-Za-z0-9_-]\{39\}' index.html | head -c 50)..."
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: .
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+- name: Replace API key with envsubst
+  run: |
+    envsubst < index.html > index-dist.html
+    mv index-dist.html index.html
+    echo "✅ Replaced with envsubst"
+    grep "AIzaSy" index.html
