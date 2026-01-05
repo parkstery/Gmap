@@ -3,33 +3,36 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # 또는 배포용 브랜치명
+      - main
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 jobs:
-  build-and-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject Google Maps API key
+      - name: Inject Google Maps API Key
         run: |
           sed -i "s/YOUR_API_KEY/${{ secrets.GOOGLE_MAPS_API_KEY }}/g" index.html
-          echo "✅ API key injected successfully."
+          echo "✅ API Key 주입 완료: $(grep -o 'AIzaSy[A-Za-z0-9_-]\{39\}' index.html | head -c 50)..."
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: .
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
