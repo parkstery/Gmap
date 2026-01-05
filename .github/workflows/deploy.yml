@@ -22,14 +22,10 @@ jobs:
 
       - name: Inject API keys
         env:
-          GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}
-          KAKAO_MAPS_KEY:  ${{ secrets.KAKAO_MAPS_KEY }}
-          NAVER_MAPS_KEY:  ${{ secrets.NAVER_MAPS_KEY }}
+          GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}          
         run: |
           set -e
           sed -i "s|GOOGLE_KEY_PLACEHOLDER|${GOOGLE_MAPS_KEY}|g" index.html
-          sed -i "s|KAKAO_KEY_PLACEHOLDER|${KAKAO_MAPS_KEY}|g" index.html
-          sed -i "s|NAVER_KEY_PLACEHOLDER|${NAVER_MAPS_KEY}|g" index.html
 
           grep -q "GOOGLE_KEY_PLACEHOLDER" index.html && exit 1
 
