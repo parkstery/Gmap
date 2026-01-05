@@ -1,38 +1,21 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
-    branches: [main]
-
+    branches: [ main ]
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
+  contents: write
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Inject API keys
-        env:
-          GOOGLE_MAPS_KEY: ${{ secrets.GOOGLE_MAPS_KEY }}          
-        run: |
-          set -e
-          sed -i "s|GOOGLE_KEY_PLACEHOLDER|${GOOGLE_MAPS_KEY}|g" index.html
-
-          grep -q "GOOGLE_KEY_PLACEHOLDER" index.html && exit 1
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+    - uses: actions/checkout@v4
+    - name: Replace API Keys
+      env:
+        GOOGLE: ${{ secrets.GOOGLE_MAPS_KEY }}
+      run: |
+        sed -i "s|GOOGLE_KEY_PLACEHOLDER|$GOOGLE|g" index.html
+        cat index.html  # 치환 확인용 로그
+    - uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
