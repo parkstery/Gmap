@@ -2,29 +2,34 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main  # 또는 master, 사용하는 브랜치에 맞게 수정
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Replace API Keys
-        env:
-          GOOGLE: ${{ secrets.GOOGLE_MAPS_KEY }}
+      - name: Inject Google Maps API key
         run: |
-          # GOOGLE_KEY_PLACEHOLDER → 실제 키로 치환
-          sed -i 's|GOOGLE_KEY_PLACEHOLDER|'"$GOOGLE"'|g' index.html
-          cat index.html  # 치환 확인용 로그
+          sed -i "s/YOUR_API_KEY/${{ secrets.GOOGLE_MAPS_API_KEY }}/g" index.html
+          echo "✅ API key injected successfully."
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: . # 루트 디렉터리 전체 업로드
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+        uses: actions/deploy-pages@v2
