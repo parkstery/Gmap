@@ -1,44 +1,11 @@
-name: Deploy to GitHub Pages
+- name: Inject API key into HTML
+  env:
+    MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+  run: |
+    echo "▶ Replacing MAPS_API_KEY only"
+    envsubst '$MAPS_API_KEY' < index.html > index.dist.html
+    mv index.dist.html index.html
 
-on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      # 1. 소스 체크아웃 __
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 2. API Key 주입 + HTML 치환
-      - name: Inject API key into HTML
-        
-        env:
-          MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-        run: |
-          echo "▶ Replacing MAPS_API_KEY in index.html"
-          envsubst '$MAPS_API_KEY' < index.html > index.dist.html
-          # envsubst < index.html > index.dist.html
-          mv index.dist.html index.html
-
-          echo "▶ Verification (masked)"
-          grep "MAPS_API_KEY" index.html || echo "✔ Placeholder replaced"
-
-      # 3. GitHub Pages 아티팩트 업로드
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      # 4. GitHub Pages 배포
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+    echo "▶ Verify result"
+    grep "maps.googleapis.com/maps/api/js" index.html
+    grep "AIza" index.html && echo "✔ API key injected"
